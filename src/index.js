@@ -1,4 +1,5 @@
 import myPath from "./navigationWorkingDirectory.js";
+import basicOperations from "./basicOperations.js";
 
 const args = process.argv.slice(2);
 const userName = args[0].split("=")[1];
@@ -34,6 +35,28 @@ function startFileManager() {
 
     if (dataCd[0] === "ls") {
       myPath.showAllInDirectory()
+    }
+
+    if (dataCd[0] === "cat") {
+      basicOperations.readFile(dataCd[1])
+    }
+
+    if (dataCd[0] === "add") {
+      basicOperations.createEmptyFile(dataCd[1])
+    }
+
+    if (dataCd[0] === "rn") {
+      basicOperations.renameFile(dataCd[1], dataCd[2])
+    }
+    if (dataCd[0] === "cp") {
+      basicOperations.copyFile(dataCd[1], dataCd[2])
+    }
+    if (dataCd[0] === "mv") {
+      basicOperations.moveFile(dataCd[1], dataCd[2])
+    }
+
+    if (dataCd[0] === "rm") {
+      basicOperations.deleteFile(dataCd[1])
     }
 
     //myPath.showCurrentPathMessage();
