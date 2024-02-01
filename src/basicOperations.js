@@ -36,7 +36,7 @@ class BasicOperation {
           maPath.showCurrentPathMessage();
         });
       } else {
-        console.error(`Operation failed`);
+        console.log(`Operation failed`);
       }
     });
   }
