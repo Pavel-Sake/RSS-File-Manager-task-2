@@ -1,5 +1,6 @@
 import myPath from "./navigationWorkingDirectory.js";
 import basicOperations from "./basicOperations.js";
+import operatingSystemInfo from "./operatingSystemInfo.js"
 
 const args = process.argv.slice(2);
 const userName = args[0].split("=")[1];
@@ -57,6 +58,10 @@ function startFileManager() {
 
     if (dataCd[0] === "rm") {
       basicOperations.deleteFile(dataCd[1])
+    }
+
+    if (dataCd[0] === "os") {
+      operatingSystemInfo.showCPUArchitecture()
     }
 
     //myPath.showCurrentPathMessage();
