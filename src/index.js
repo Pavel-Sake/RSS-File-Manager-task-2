@@ -2,6 +2,7 @@ import myPath from "./navigationWorkingDirectory.js";
 import basicOperations from "./basicOperations.js";
 import operatingSystemInfo from "./operatingSystemInfo.js"
 import hashCalculation from "./hashCalculation.js"
+import compressDecompress from "./compressDecompress.js"
 
 const args = process.argv.slice(2);
 const userName = args[0].split("=")[1];
@@ -68,6 +69,15 @@ function startFileManager() {
 
     if (dataCd[0] === "hash") {
       hashCalculation.calculateHash(dataCd[1])
+    }
+    //
+
+    if (dataCd[0] === "c") {
+      compressDecompress.compress(dataCd[1], dataCd[2])
+    }
+
+    if (dataCd[0] === "d") {
+      compressDecompress.decompress(dataCd[1], dataCd[2])
     }
 
     //myPath.showCurrentPathMessage();
