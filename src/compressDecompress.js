@@ -3,6 +3,7 @@ import maPath from "./navigationWorkingDirectory.js";
 import fs from "fs";
 import fsPromise from "fs/promises";
 import zlib from "zlib";
+import { INVALID_INPUT } from "./constants.js";
 
 const EXTENSION_FOR_COMPRESS = ".br";
 
@@ -30,7 +31,16 @@ async function checkIsPathsExist(pathToTargetFile, pathToTaDestination) {
 class CompressDecompress {
   constructor() {}
 
-  async compress(nameOfFile, destination) {
+  async compress(args) {
+    const numberOfCommands = args.length;
+
+    if (numberOfCommands !== 2) {
+      console.log(INVALID_INPUT);
+      return;
+    }
+
+    const nameOfFile = args[0];
+    const destination = args[1];
     try {
       const { pathToTargetFile, pathToTaDestination } = getPathToTargets(
         nameOfFile,
@@ -64,7 +74,7 @@ class CompressDecompress {
         brotliStream.on("error", handleError);
 
         writeStream.on("finish", () => {
-          console.log("File compressed successfully.");
+          maPath.showCurrentPathMessage();
         });
       } else {
         throw new Error();
@@ -74,7 +84,16 @@ class CompressDecompress {
     }
   }
 
-  async decompress(nameOfFile, destination) {
+  async decompress(args) {
+    const numberOfCommands = args.length;
+
+    if (numberOfCommands !== 2) {
+      console.log(INVALID_INPUT);
+      return;
+    }
+
+    const nameOfFile = args[0];
+    const destination = args[1];
     try {
       const { pathToTargetFile, pathToTaDestination } = getPathToTargets(
         nameOfFile,
@@ -97,20 +116,19 @@ class CompressDecompress {
           fileNameWithCompress
         );
 
-        const readStream = fs.createReadStream(pathToTargetFile)
-        const writeStream = fs.createWriteStream(pathToFileOutput)
+        const readStream = fs.createReadStream(pathToTargetFile);
+        const writeStream = fs.createWriteStream(pathToFileOutput);
 
-        const brotliStream = zlib.createBrotliDecompress()
+        const brotliStream = zlib.createBrotliDecompress();
 
-        readStream.pipe(brotliStream).pipe(writeStream)
+        readStream.pipe(brotliStream).pipe(writeStream);
 
-        readStream.on("error", handleError)
-        writeStream.on("error", handleError)
+        readStream.on("error", handleError);
+        writeStream.on("error", handleError);
 
         brotliStream.on("finish", () => {
-          console.log("File compressed successfully.");
-        })
-
+          maPath.showCurrentPathMessage();
+        });
       } else {
         throw new Error();
       }

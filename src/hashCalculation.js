@@ -3,11 +3,21 @@ import crypto from "crypto";
 import fs from "fs";
 import maPath from "./navigationWorkingDirectory.js";
 
+import { INVALID_INPUT, OPERATION_FAILED } from "./constants.js";
+
 class HashCalculation {
   constructor() {}
 
-  calculateHash(nameOfFile) {
-    const pathToTargetFile = path.join(maPath.currentPath, nameOfFile);
+  calculateHash(args) {
+    const numberOfCommands = args.length;
+
+    if (numberOfCommands !== 1) {
+      console.log(INVALID_INPUT);
+      return;
+    }
+
+    const fileName = args[0];
+    const pathToTargetFile = path.join(maPath.currentPath, fileName);
 
     const hash = crypto.createHash("sha256");
     const fileStream = fs.createReadStream(pathToTargetFile);
@@ -23,8 +33,8 @@ class HashCalculation {
     });
 
     fileStream.on("error", (error) => {
-        console.log(`Operation failed`);
-      });
+      console.log(OPERATION_FAILED);
+    });
   }
 }
 

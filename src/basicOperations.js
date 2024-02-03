@@ -2,14 +2,22 @@ import fs from "fs";
 import fsPromise from "fs/promises";
 import maPath from "./navigationWorkingDirectory.js";
 import path from "path";
+import { OPERATION_FAILED, INVALID_INPUT } from "./constants.js";
 
 class BasicOperation {
   constructor() {}
 
-  async readFile(pathToFile) {
-    try {
-      const pathToTargetFile = path.join(maPath.currentPath, pathToFile);
+  async readFile(args) {
+    const numberOfArgs = args.length;
 
+    if (numberOfArgs !== 1) {
+      console.log(INVALID_INPUT);
+      return;
+    }
+
+    try {
+      const pathToFile = args[0];
+      const pathToTargetFile = path.join(maPath.currentPath, pathToFile);
       const readableStream = fs.createReadStream(pathToTargetFile);
       readableStream.on("data", (chunk) => {
         console.log(`${chunk}`);
@@ -20,39 +28,110 @@ class BasicOperation {
       });
 
       readableStream.on("error", (error) => {
-        console.error(`Operation failed`);
+        console.log(OPERATION_FAILED);
       });
     } catch (err) {
-      console.error(`Operation failed`);
+      console.log(OPERATION_FAILED);
     }
   }
 
-  createEmptyFile(nameOfFile) {
-    const pathToTargetFile = path.join(maPath.currentPath, nameOfFile);
+  createEmptyFile(args) {
+    const numberOfArgs = args.length;
 
-    fs.access(pathToTargetFile, fs.constants.F_OK, (err) => {
+    if (numberOfArgs !== 1) {
+      console.log(INVALID_INPUT);
+      return;
+    }
+
+    const filName = args[0];
+    const pathToTargetFile = path.join(maPath.currentPath, filName);
+    const pathToTargetDirectory = path.dirname(pathToTargetFile);
+    console.log(pathToTargetDirectory);
+
+    fs.access(pathToTargetDirectory, fs.constants.F_OK, (err) => {
       if (err) {
+        console.log(INVALID_INPUT);
+      } else {
         fs.appendFile(pathToTargetFile, "", (err) => {
           maPath.showCurrentPathMessage();
         });
-      } else {
-        console.log(`Operation failed`);
       }
     });
   }
 
-  async renameFile(oldNameOfFile, newNameOfFile) {
-    const pathToOldFile = path.join(maPath.currentPath, oldNameOfFile);
-    const pathToNewtFile = path.join(maPath.currentPath, newNameOfFile);
+  async renameFile(args) {
+    const numberOfArgs = args.length;
+
+    if (numberOfArgs !== 2) {
+      console.log(INVALID_INPUT);
+      return;
+    }
+
+    const oldFileName = args[0];
+    const newFileName = args[1];
+    const pathToOldFile = path.join(maPath.currentPath, oldFileName);
+    const pathToNewFileName = path.join(maPath.currentPath, newFileName);
 
     try {
-      await fsPromise.rename(pathToOldFile, pathToNewtFile);
+      await fsPromise.access(pathToOldFile, fsPromise.constants.F_OK);
+      await fsPromise.rename(pathToOldFile, pathToNewFileName);
+      maPath.showCurrentPathMessage();
+    } catch (err) {
+      console.log(INVALID_INPUT);
+    }
+  }
+
+  async copyFile(args) {
+    const numberOfArgs = args.length;
+
+    if (numberOfArgs !== 2) {
+      console.log(INVALID_INPUT);
+      return;
+    }
+
+    const nameOfFile = args[0];
+    const pathToDirectory = args[1];
+
+    const pathToOldFile = path.join(maPath.currentPath, nameOfFile);
+    const pathToNewtDirectory = path.join(maPath.currentPath, pathToDirectory);
+    const pathToNewtFile = path.join(
+      maPath.currentPath,
+      pathToDirectory,
+      nameOfFile
+    );
+
+    try {
+      await fsPromise.access(pathToNewtDirectory, fsPromise.constants.F_OK);
+      await fsPromise.access(pathToOldFile, fsPromise.constants.F_OK);
+      const sourceStream = fs.createReadStream(pathToOldFile);
+      const destinationStream = fs.createWriteStream(pathToNewtFile);
+
+      sourceStream.on("error", (err) => {
+        console.log(OPERATION_FAILED);
+      });
+
+      destinationStream.on("error", (err) => {
+        console.log(OPERATION_FAILED);
+      });
+
+      sourceStream.pipe(destinationStream);
+      maPath.showCurrentPathMessage();
     } catch (err) {
       console.log(`Operation failed`);
     }
   }
 
-  async copyFile(nameOfFile, pathToDirectory) {
+  async moveFile(args) {
+    const numberOfArgs = args.length;
+
+    if (numberOfArgs !== 2) {
+      console.log(INVALID_INPUT);
+      return;
+    }
+
+    const nameOfFile = args[0];
+    const pathToDirectory = args[1];
+
     const pathToOldFile = path.join(maPath.currentPath, nameOfFile);
     const pathToNewtDirectory = path.join(maPath.currentPath, pathToDirectory);
     const pathToNewtFile = path.join(
@@ -67,65 +146,41 @@ class BasicOperation {
 
       const sourceStream = fs.createReadStream(pathToOldFile);
       const destinationStream = fs.createWriteStream(pathToNewtFile);
-
       sourceStream.on("error", (err) => {
-        console.log(`Operation failed`);
+        console.log(OPERATION_FAILED);
       });
 
       destinationStream.on("error", (err) => {
-        console.log(`Operation failed`);
+        console.log(OPERATION_FAILED);
       });
 
       sourceStream.pipe(destinationStream);
-      maPath.showCurrentPathMessage();
-    } catch (err) {
-      console.log(`Operation failed`);
-    }
-  }
-
-  async moveFile(nameOfFile, pathToDirectory) {
-    const pathToOldFile = path.join(maPath.currentPath, nameOfFile);
-    const pathToNewtDirectory = path.join(maPath.currentPath, pathToDirectory);
-    const pathToNewtFile = path.join(
-      maPath.currentPath,
-      pathToDirectory,
-      nameOfFile
-    );
-
-    try {
-      await fsPromise.access(pathToNewtDirectory, fsPromise.constants.F_OK);
-      await fsPromise.access(pathToOldFile, fsPromise.constants.F_OK);
-
-      const sourceStream = fs.createReadStream(pathToOldFile);
-      const destinationStream = fs.createWriteStream(pathToNewtFile);
-      sourceStream.on("error", (err) => {
-        console.log(`Operation failed`);
-      });
-
-      destinationStream.on("error", (err) => {
-        console.log(`Operation failed`);
-      });
-
-      sourceStream.pipe(destinationStream);
-      maPath.showCurrentPathMessage();
 
       destinationStream.on("finish", () => {
         fsPromise.unlink(pathToOldFile);
+        maPath.showCurrentPathMessage();
       });
     } catch (error) {
-      console.log(`Operation failed`);
+      console.log(INVALID_INPUT);
     }
   }
 
- async deleteFile(nameOfFile) {
+  async deleteFile(args) {
+    const numberOfArgs = args.length;
+
+    if (numberOfArgs !== 1) {
+      console.log(INVALID_INPUT);
+      return;
+    }
+
+    const nameOfFile = args[0];
     const pathToOldFile = path.join(maPath.currentPath, nameOfFile);
 
     try {
-        await fsPromise.unlink(pathToOldFile);
-        maPath.showCurrentPathMessage();
-        
+      await fsPromise.unlink(pathToOldFile);
+      maPath.showCurrentPathMessage();
     } catch (error) {
-        console.log(`Operation failed`);
+      console.log(INVALID_INPUT);
     }
   }
 }

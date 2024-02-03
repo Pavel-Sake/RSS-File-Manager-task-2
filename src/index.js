@@ -1,86 +1,30 @@
 import myPath from "./navigationWorkingDirectory.js";
-import basicOperations from "./basicOperations.js";
-import operatingSystemInfo from "./operatingSystemInfo.js"
-import hashCalculation from "./hashCalculation.js"
-import compressDecompress from "./compressDecompress.js"
+import commandController from "./commandController.js";
 
 const args = process.argv.slice(2);
 const userName = args[0].split("=")[1];
 const EXIT = ".exit";
-const UP = "up";
 
 const greetingMessage = `Welcome to the File Manager, ${userName} !`;
 const partingMessage = `Thank you for using File Manager, ${userName}, goodbye`;
 
-const currentPath = `You are currently in ${myPath.currentPath}`;
+function closeFileManager(command, process) {
+  if (command === EXIT) {
+    process.kill(process.pid, "SIGINT");
+    myPath.showCurrentPathMessage();
+  }
+}
 
 function startFileManager() {
   console.log(greetingMessage);
   myPath.showCurrentPathMessage();
 
   process.stdin.on("data", (data) => {
-    const receivedData = data.toString().trim();
+    const receivedCommand = data.toString().trim();
 
-    if (receivedData === EXIT) {
-      process.kill(process.pid, "SIGINT");
-      myPath.showCurrentPathMessage();
-    }
+    closeFileManager(receivedCommand, process);
 
-    if (receivedData === UP) {
-      myPath.upPath();
-    }
-
-    const dataCd = receivedData.split(" ");
-
-    if (dataCd[0] === "cd") {
-       myPath.changePath(dataCd[1]);
-    }
-
-    if (dataCd[0] === "ls") {
-      myPath.showAllInDirectory()
-    }
-
-    if (dataCd[0] === "cat") {
-      basicOperations.readFile(dataCd[1])
-    }
-
-    if (dataCd[0] === "add") {
-      basicOperations.createEmptyFile(dataCd[1])
-    }
-
-    if (dataCd[0] === "rn") {
-      basicOperations.renameFile(dataCd[1], dataCd[2])
-    }
-    if (dataCd[0] === "cp") {
-      basicOperations.copyFile(dataCd[1], dataCd[2])
-    }
-    if (dataCd[0] === "mv") {
-      basicOperations.moveFile(dataCd[1], dataCd[2])
-    }
-
-    if (dataCd[0] === "rm") {
-      basicOperations.deleteFile(dataCd[1])
-    }
-
-    if (dataCd[0] === "os") {
-      operatingSystemInfo.showCPUArchitecture()
-    }
-    //
-
-    if (dataCd[0] === "hash") {
-      hashCalculation.calculateHash(dataCd[1])
-    }
-    //
-
-    if (dataCd[0] === "c") {
-      compressDecompress.compress(dataCd[1], dataCd[2])
-    }
-
-    if (dataCd[0] === "d") {
-      compressDecompress.decompress(dataCd[1], dataCd[2])
-    }
-
-    //myPath.showCurrentPathMessage();
+    commandController(receivedCommand);
   });
 
   process.on("SIGINT", () => {
@@ -93,6 +37,3 @@ function startFileManager() {
 }
 
 startFileManager();
-
-
-

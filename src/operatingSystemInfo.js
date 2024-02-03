@@ -1,7 +1,4 @@
-import fs from "fs";
-import fsPromise from "fs/promises";
 import maPath from "./navigationWorkingDirectory.js";
-import path from "path";
 import os from "os";
 
 const args = process.argv.slice(2);
@@ -16,6 +13,22 @@ class OperatingSystemInfo {
     maPath.showCurrentPathMessage();
   }
 
+  cpu() {
+    const cpus = os.cpus();
+    const newCPUS = [];
+
+    cpus.forEach((item) => {
+      const cpusItem = {
+        model: item.model,
+        speed: item.speed / 1000,
+      };
+      newCPUS.push(cpusItem);
+    });
+
+    console.log(newCPUS);
+    maPath.showCurrentPathMessage();
+  }
+
   showHomeDirectory() {
     const homeDirectory = os.homedir();
     console.log(homeDirectory);
@@ -27,7 +40,7 @@ class OperatingSystemInfo {
     maPath.showCurrentPathMessage();
   }
 
-  showCPUArchitecture () {
+  showCPUArchitecture() {
     const cpuArchitecture = process.arch;
     console.log(cpuArchitecture);
     maPath.showCurrentPathMessage();
